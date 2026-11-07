@@ -53,6 +53,7 @@ def hbar(ax, labels, hits, emph, title, note=None, chance=None):
         ax.add_patch(FancyBboxPatch((0, yy - .21), max(v, .5), .42, boxstyle="round,pad=0,rounding_size=0.06",
                                     mutation_aspect=.25, lw=0, fc=col))
         ax.plot([lo, hi], [yy, yy], color=INK2, lw=1, solid_capstyle="butt", zorder=3)
+        for xx in (lo, hi): ax.plot([xx, xx], [yy - .11, yy + .11], color=INK2, lw=1, zorder=3)
         ax.text(min(hi, 100) + 1.5, yy, f"{v:.0f}%  ({sum(h)}/{len(h)})", va="center", ha="left",
                 fontsize=8.5, color=INK if e else INK2, fontweight="bold" if e else "normal")
     if chance is not None:
