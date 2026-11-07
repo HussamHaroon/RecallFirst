@@ -2,7 +2,7 @@
 
 Companion release for *"Recall First, Then Let the Model Choose: Gemma 4 as a Bug-Localization Selector, Tested on
 Post-Cutoff Issues"* (Kaggle × Google DeepMind, Gemma 4 Developer Agent Paper Track, 2026) — PDF in [`paper/`](paper/RecallFirst_paper.pdf).
-Code: Apache-2.0. Reproduce every number on CPU: [`notebooks/reproduce.ipynb`](notebooks/reproduce.ipynb).
+Author: Hussam Khaskheli (GitHub: HussamHaroon). Code: Apache-2.0. Reproduce every number on CPU: [`notebooks/reproduce.ipynb`](notebooks/reproduce.ipynb).
 
 **What it is for.** Before an LLM file localizer's SWE-bench number can be trusted, three questions need answers:
 is it better than strong baselines *on the same instances*, did it lose because the ranker is weak or because the
