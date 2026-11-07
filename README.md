@@ -12,7 +12,7 @@ benchmark? This release answers them for Gemma-4-12B-it and lets you ask them of
 - **Same-instance orderings** for 57 SWE-bench Lite instances (8 repositories): BM25, dense, four likelihood
   rerankers, Gemma listwise selection on two pools.
 - **Controls**: the selector on BM25's pool only, with the issue removed, with another issue from the same
-  repository, and under two extra shuffles; a 10-way issue-only probe with hard distractors and four non-LLM readers
+  repository, under two extra shuffles, and path-only BM25/MiniLM rankings of the same pools (Lite and post-cutoff); a 10-way issue-only probe with hard distractors and four non-LLM readers
   scored on the identical options.
 - **A post-cutoff set**: 120 SWE-bench-Live issues created April–August 2025 (84 repositories, after Gemma 4's
   January 2025 cutoff) with BM25/dense top-100 and the frozen selector's answers.
@@ -26,8 +26,10 @@ benchmark? This release answers them for Gemma-4-12B-it and lets you ask them of
 | Likelihood scoring (NAMI) of BM25's top-25 | 5% | 26% |
 | **Gemma selecting from the same 25 files** | **47%** | **63%** |
 | Gemma, BM25-25 ∪ dense-25 pool | 61% | 84% |
-| … same pool, issue removed / issue from another task | 7% / 4% | 30% / 19% |
+| … same pool, issue removed / issue from another task (model's own picks) | 7% / 2% | 21% / 14% |
+| … same pool ranked by path strings only (BM25 / MiniLM) | 25% / 28% | 54% / 42% |
 | Post-cutoff (120 issues): dense / **Gemma** | 38% / **61%** | 72% / **85%** |
+| Post-cutoff, issue removed / path-only BM25 | 11% / 32% | 31% / 60% |
 
 ## Quick start (CPU)
 

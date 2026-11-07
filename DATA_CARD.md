@@ -53,6 +53,18 @@ all splits; pipeline frozen from the Lite study (`harness/run_postcutoff_live.py
   `gemma_fill`: rank of the first gold file), `gemma_top10`, `parse_n` (10 on 119/120), `raw`, `bm25_top100`,
   `dense_top100`, `secs` (download + indexing + selection).
 
+## `pathonly_livecontrols.jsonl` — path-only baselines and post-cutoff controls (594 rows)
+Produced by `harness/run_pathonly_livecontrols.py`. `set` (`lite` / `live`), `condition`:
+- `path_bm25`, `path_dense` (Lite 57 + post-cutoff 120): the instance's BM25-25 ∪ dense-25 pool ranked by BM25 /
+  MiniLM over the **path strings only** (lower-cased alphanumeric tokens ≥2 characters, `py` dropped; MiniLM sees the
+  path with `/` and `_` as spaces); `rank` = rank of the first gold file, `top10`.
+- `live_empty`, `live_mismatch` (post-cutoff 120): Gemma selector with the issue replaced by a placeholder / by the
+  issue of the next instance from the same repository (`same_repo` false when the repository has one issue: another
+  repository's next instance). `top10` = the model's picks, `parse_n`, `raw`, `issue_from`.
+  **Use the model's own picks (`top10`) for these controls**: without an issue the model often names fewer than ten
+  files, and `rank` fills the rest in BM25-then-dense order, which derives from the real issue. The same applies to
+  `union_empty` / `union_mismatch` in `controls_probe57.jsonl`; the statistics script uses picks only.
+
 ## `orderings_pool61.jsonl` — controlled study (25 rows: astropy 6, django 19)
 Gold + 60 seeded random distractor files (`n_files` = 61). **Complete** orderings and gold ranks for `bm25`,
 `nami_bpt`, `nami_bits`, `qlm`, `h_real`; issue features as above. Fixed scorer.

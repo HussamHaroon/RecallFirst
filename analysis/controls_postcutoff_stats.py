@@ -44,7 +44,9 @@ for name, key in (("path_tiebreak", "path_tiebreak_correct"), ("dense", "dense_c
 for k in (1, 5):
     Real = {i: hit(base[i]["gemma_paths"], k) for i in ids}
     for cond in ("union_empty", "union_mismatch", "union_seed1", "union_seed2"):
-        pair(f"top{k} Gemma real issue vs {cond}", Real, {i: hit(c15[cond][i]["rank"], k) for i in ids})
+        def crank(x):   # controls: the model's own picks only (fill order derives from the real issue)
+            return next((j for j, f in enumerate(x["top10"], 1) if f == x["gold"]), None) if cond in ("union_empty", "union_mismatch") else x["rank"]
+        pair(f"top{k} Gemma real issue vs {cond}", Real, {i: hit(crank(c15[cond][i]), k) for i in ids})
 # shuffle stability
 S = ["gemma_paths", "union_seed1", "union_seed2"]
 def r_of(i, s): return base[i]["gemma_paths"] if s == "gemma_paths" else c15[s][i]["rank"]
@@ -100,12 +102,31 @@ def rrf(i):
         for k, f in enumerate(o, 1): sc[f] = sc.get(f, 0) + 1 / (60 + k)
     o = sorted(sc, key=lambda f: -sc[f]); return next((k for k, f in enumerate(o, 1) if f == RAW[i]["gold"]), None)
 pair("v3 4.1 RRF(BM25,NAMI) vs BM25 top5", {i: hit(rrf(i), 5) for i in ids}, {i: hit(RAW[i]["ranks"]["bm25"], 5) for i in ids})
+# ---- cell 17: path-only baselines (Lite + post-cutoff) and post-cutoff controls (picks only)
+C17 = defaultdict(dict)
+for l in open("data/pathonly_livecontrols.jsonl"):
+    x = json.loads(l)
+    if "error" not in x: C17[x["condition"]][x["instance"]] = x
+def picks(x): return next((j for j, f in enumerate(x["top10"], 1) if f in set(x["gold"])), None)
+print("== Path-only baselines and post-cutoff controls ==")
+for k in (1, 5):
+    G = {i: hit(base[i]["gemma_paths"], k) for i in ids}
+    for c in ("path_bm25", "path_dense"):
+        pair(f"pathonly lite top{k} Gemma vs {c}", G, {i: hit(C17[c][i]["rank"], k) for i in ids})
+    GL = {i: hit(D[i]["ranks"]["gemma_fill"], k) for i in D}
+    for c in ("path_bm25", "path_dense"):
+        pair(f"pathonly live top{k} Gemma vs {c}", GL, {i: hit(C17[c][i]["rank"], k) for i in D})
+    nf = [i for i in D if not D[i]["stem_in_issue"]]
+    pair(f"pathonly live name-free top{k} Gemma vs path_bm25", {i: GL[i] for i in nf}, {i: hit(C17["path_bm25"][i]["rank"], k) for i in nf})
+    for c in ("live_empty", "live_mismatch"):
+        pair(f"top{k} Gemma real issue vs {c} (post-cutoff)", GL, {i: hit(picks(C17[c][i]), k) for i in D})
 def fam(n):
     if n.startswith(("top1 Gemma(BM25", "top5 Gemma(BM25", "v3 4.1")): return "4.1 same pool"
     if n.startswith("v3 4.2"): return "4.2 in-pool rerankers"
     if n.startswith("union"): return "4.3 union pool"
     if "real issue" in n: return "4.4 controls"
     if n.startswith("probe57"): return "4.4 probe"
+    if n.startswith("pathonly"): return "4.4 path-only"
     if n.startswith("live"): return "4.4 post-cutoff"
     return "other"
 F = defaultdict(list)
