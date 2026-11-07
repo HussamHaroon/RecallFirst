@@ -1,0 +1,7 @@
+# CPU analysis (everything in nami/stats.py and analysis/): tested with Python 3.10-3.12
+numpy>=1.24
+scipy>=1.10
+matplotlib>=3.7          # analysis/make_figures.py only
+# GPU harness scripts (harness/*.py) additionally need:
+# torch>=2.4  transformers>=4.50  datasets>=2.19  sentence-transformers>=3.0  rank_bm25>=0.2.2
+# tree-sitter-language-pack>=0.6  bitsandbytes (NF4 runs only)
