@@ -28,7 +28,7 @@ benchmark? This release answers them for Gemma-4-12B-it and lets you ask them of
 | Gemma, BM25-25 ∪ dense-25 pool | 61% | 84% |
 | … same pool, issue removed / issue from another task (model's own picks) | 7% / 2% | 21% / 14% |
 | … same pool ranked by path strings only (BM25 / MiniLM) | 25% / 28% | 54% / 42% |
-| Post-cutoff (120 issues): dense / **Gemma** | 38% / **61%** | 72% / **85%** |
+| Post-cutoff (120 issues): dense / **Gemma** | 38% / **61%** | 72.5% / **85%** |
 | Post-cutoff, issue removed / path-only BM25 | 11% / 32% | 31% / 60% |
 
 ## Quick start (CPU)
