@@ -84,10 +84,22 @@ for k in (1, 5):
         pair(f"union top{k} {g} vs dense", {i: hit(base[i][g], k) for i in ids}, {i: hit(base[i]["dense"], k) for i in ids})
 pair("union top5 gemma_paths vs bm25", {i: hit(base[i]["gemma_paths"], 5) for i in ids}, {i: hit(base[i]["bm25"], 5) for i in ids})
 pair("union top1 gemma_names vs gemma_paths", {i: hit(base[i]["gemma_names"], 1) for i in ids}, {i: hit(base[i]["gemma_paths"], 1) for i in ids})
-for name, b, c in (("v3 4.1 RRF(BM25,NAMI) vs BM25 top5", 0, 8), ("v3 4.2 in-pool dense vs BM25 top5", 5, 6),
-                   ("v3 4.2 in-pool NAMI vs BM25 top5", 3, 17), ("v3 4.2 in-pool QLM vs BM25 top5", 4, 19),
-                   ("v3 4.2 in-pool no-null vs BM25 top5", 3, 17)):
-    p = mcnemar(b, c); TESTS.append((name, b, c, p)); print(f"  {name:58s} +{b}/-{c}  p={p:.4f}")
+# in-pool rerankers (BM25-25 pool, instances whose gold is in it) and RRF(BM25, NAMI), recomputed from orderings
+RAW = {x["instance"]: x for x in map(json.loads, open(B)) if "ranks" in x}
+inp = [i for i in ids if RAW[i]["gold"] in RAW[i]["orders"]["bm25"][:25]]
+def pool_rank(i, m):
+    pool = set(RAW[i]["orders"]["bm25"][:25]); o = [f for f in RAW[i]["orders"][m] if f in pool]
+    return next((k for k, f in enumerate(o, 1) if f == RAW[i]["gold"]), None)
+BMp = {i: hit(RAW[i]["ranks"]["bm25"], 5) for i in inp}
+for m in ("nami_bpt", "qlm", "h_real", "dense"):
+    pair(f"v3 4.2 in-pool {m} vs BM25 top5", {i: hit(pool_rank(i, m), 5) for i in inp}, BMp)
+def rrf(i):
+    sc = {}
+    for m in ("bm25", "nami_bpt"):
+        o = [f for f in RAW[i]["orders"][m] if f in set(RAW[i]["orders"]["bm25"][:25])]
+        for k, f in enumerate(o, 1): sc[f] = sc.get(f, 0) + 1 / (60 + k)
+    o = sorted(sc, key=lambda f: -sc[f]); return next((k for k, f in enumerate(o, 1) if f == RAW[i]["gold"]), None)
+pair("v3 4.1 RRF(BM25,NAMI) vs BM25 top5", {i: hit(rrf(i), 5) for i in ids}, {i: hit(RAW[i]["ranks"]["bm25"], 5) for i in ids})
 def fam(n):
     if n.startswith(("top1 Gemma(BM25", "top5 Gemma(BM25", "v3 4.1")): return "4.1 same pool"
     if n.startswith("v3 4.2"): return "4.2 in-pool rerankers"
